@@ -1,32 +1,32 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+importReact, { useState, useRef, useEffect } from 'react';
 
 // --- Helper Components & Icons ---
 // To avoid re-rendering issues, these are defined outside the main App component.
 
 const CheckIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
-    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    <path fillRule="evenodd" d="M10 18a8 8 0 100-168 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
   </svg>
 );
 
-const AppStoreIcon: React.FC = () => (
+const AppStoreIcon:React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <path strokeLinecap="round"strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
     </svg>
 );
 
 const GooglePlayIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 09 9 0 0118 0z" />
     </svg>
 );
 
 const FeatureIcon: React.FC<{ icon: string }> = ({ icon }) => {
-    // Fix: Replaced `JSX.Element` with `React.ReactElement` to resolve "Cannot find namespace 'JSX'" error.
+    // Fix: Replaced `JSX.Element` with `React.ReactElement` to resolve"Cannot find namespace 'JSX'"error.
     const icons: { [key: string]: React.ReactElement } = {
-        'batch': <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
+        'batch': <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 00-2-2v-6a2 2 0 002-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />,
         'platform': <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2zM5 12h.01M19 12h.01M12 5h.01" />,
         'input': <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />,
         'output': <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />,
@@ -35,7 +35,7 @@ const FeatureIcon: React.FC<{ icon: string }> = ({ icon }) => {
     };
 
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             {icons[icon]}
         </svg>
     );
@@ -45,22 +45,62 @@ const FeatureIcon: React.FC<{ icon: string }> = ({ icon }) => {
 // --- Page Sections ---
 
 const Header: React.FC = () => {
+  const[isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userPlan, setUserPlan] = useState('free');
+
+  // In a real app, this would fetch user data from your backend
+  useEffect(() => {
+    // Mock user data - in a real app, you would fetch this from your backend
+   const token = localStorage.getItem('token');
+if (token) {
+      setIsLoggedIn(true);
+      // setUserPlan would be set based on actual user data
+    }
+  }, []);
+
   return (
     <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="text-2xl font-bold text-gray-900">
           <span className="text-primary">App</span>Screens
         </div>
-        <nav className="hidden md:flex space-x-8 items-center">
+        <navclassName="hidden md:flex space-x-8 items-center">
           <a href="#features" className="text-gray-600 hover:text-primary transition">Features</a>
           <a href="#pricing" className="text-gray-600 hover:text-primary transition">Pricing</a>
           <a href="#api" className="text-gray-600 hover:text-primary transition">API</a>
         </nav>
         <div className="flex items-center space-x-4">
-          <button className="text-gray-600 hover:text-primary transition hidden sm:block">Log In</button>
-          <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition shadow-sm">
-            Sign Up Free
-          </button>
+          {isLoggedIn ? (
+           <div className="flexitems-center space-x-4">
+              <span className="text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full capitalize">
+                {userPlan} Plan
+              </span>
+              <button 
+                className="text-gray-600 hover:text-primary transition"
+                onClick={()=> {
+                  localStorage.removeItem('token');
+                  setIsLoggedIn(false);
+                }}
+              >
+                Log Out
+              </button>
+           </div>
+          ) : (
+            <>
+              <button 
+                className="text-gray-600 hover:text-primary transition hidden sm:block"
+                onClick={() => setIsLoggedIn(true)}
+             >
+                Log In
+              </button>
+              <button 
+                className="bg-primary text-white px-4 py-2rounded-md hover:bg-primary-700 transition shadow-sm"
+                onClick={() => setIsLoggedIn(true)}
+              >
+                Sign Up Free
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -73,18 +113,18 @@ const Hero: React.FC = () => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const suggestionsRef = useRef<HTMLDivElement>(null);
 
-    // Mock data for app suggestions
+    //Mock data for app suggestions
     const mockApps = [
         { name: 'Google Maps', publisher: 'Google LLC', icon: '🗺️', url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.maps' },
-        { name: 'Instagram', publisher: 'Meta Platforms, Inc.', icon: '📸', url: 'https://play.google.com/store/apps/details?id=com.instagram.android' },
+{ name: 'Instagram', publisher: 'Meta Platforms, Inc.',icon: '📸', url: 'https://play.google.com/store/apps/details?id=com.instagram.android' },
         { name: 'TikTok', publisher: 'TikTok Pte. Ltd.', icon: '🎵', url: 'https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically' },
         { name: 'WhatsApp Messenger', publisher: 'WhatsApp LLC', icon: '💬', url: 'https://play.google.com/store/apps/details?id=com.whatsapp' },
-        { name: 'Spotify', publisher: 'Spotify AB', icon: '🎧', url: 'https://play.google.com/store/apps/details?id=com.spotify.music' },
+        { name: 'Spotify', publisher:'Spotify AB', icon: '🎧', url: 'https://play.google.com/store/apps/details?id=com.spotify.music' },
         { name: 'Netflix', publisher: 'Netflix, Inc.', icon: '🎬', url: 'https://play.google.com/store/apps/details?id=com.netflix.mediaclient' },
-    ];
+   ];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const query = e.target.value;
+const query = e.target.value;
         setAppUrl(query);
 
         if (query.length > 0) {
@@ -102,10 +142,10 @@ const Hero: React.FC = () => {
     const handleSuggestionClick = (app: { url: string }) => {
         setAppUrl(app.url);
         setShowSuggestions(false);
-    };
+};
 
     const handleFocus = () => {
-        if (appUrl.length > 0 && suggestions.length > 0) {
+        if (appUrl.length >0 && suggestions.length > 0) {
             setShowSuggestions(true);
         }
     }
@@ -113,7 +153,7 @@ const Hero: React.FC = () => {
     // Effect to handle clicks outside the suggestions dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+           if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
                 setShowSuggestions(false);
             }
         };
@@ -130,12 +170,12 @@ const Hero: React.FC = () => {
                     The Easiest Way to Download <br /> <span className="text-primary">App Screenshots</span>
                 </h1>
                 <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                    Instantly grab high-quality screenshots from the Apple App Store and Google Play Store. Perfect for developers, marketers, and ASO specialists.
+                    Instantly grab high-quality screenshots from the Apple App Store and Google Play Store. Perfectfor developers, marketers, and ASO specialists.
                 </p>
-                <div className="mt-10 max-w-2xl mx-auto" ref={suggestionsRef}>
+                <divclassName="mt-10 max-w-2xl mx-auto" ref={suggestionsRef}>
                     <form className="flex flex-col sm:flex-row gap-4" onSubmit={(e) => e.preventDefault()}>
                         <div className="relative flex-grow">
-                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none space-x-2">
+                             <div className="absolute inset-y-0 left-0pl-3 flex items-center pointer-events-none space-x-2">
                                 <AppStoreIcon />
                                 <GooglePlayIcon />
                             </div>
@@ -144,16 +184,16 @@ const Hero: React.FC = () => {
                                 value={appUrl}
                                 onChange={handleInputChange}
                                 onFocus={handleFocus}
-                                placeholder="Enter App Store or Google Play URL/ID"
+                                placeholder="Enter App Store or GooglePlay URL/ID"
                                 className="w-full pl-20 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:ring-primary-500 focus:border-primary-500 transition text-lg"
                                 autoComplete="off"
                             />
-                            {showSuggestions && suggestions.length > 0 && (
+                            {showSuggestions && suggestions.length >0 && (
                                 <ul className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl text-left max-h-80 overflow-y-auto">
                                     {suggestions.map((app) => (
                                         <li 
                                             key={app.name} 
-                                            className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-4 border-b last:border-b-0"
+                                           className="px-4 py-3 hover:bg-gray-100 cursor-pointer flex items-center gap-4 border-b last:border-b-0"
                                             onMouseDown={() => handleSuggestionClick(app)}
                                         >
                                             <div className="text-3xl flex-shrink-0 w-10 text-center">{app.icon}</div>
@@ -169,11 +209,11 @@ const Hero: React.FC = () => {
                         <button
                             type="submit"
                             className="bg-primary text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-primary-700 transition shadow-md"
-                        >
+                       >
                             Download Screenshots
                         </button>
                     </form>
-                    <p className="mt-4 text-sm text-gray-500">
+                    <pclassName="mt-4 text-sm text-gray-500">
                         10 free downloads. No credit card required.
                     </p>
                 </div>
@@ -182,35 +222,35 @@ const Hero: React.FC = () => {
     );
 };
 
-const features = [
+const features =[
     { icon: 'batch', title: 'Batch Download', description: 'Process multiple apps simultaneously to save time.' },
     { icon: 'platform', title: 'Multi-Platform Support', description: 'Works seamlessly with both Google Play and the Apple App Store.' },
-    { icon: 'input', title: 'Flexible Input Methods', description: 'Use an App ID, store URL, or even search by app name.' },
+    { icon: 'input', title: 'Flexible Input Methods', description: 'Use an App ID, store URL,or even search by app name.' },
     { icon: 'output', title: 'Versatile Output Formats', description: 'Get screenshots as ZIP archives, organized folders, or via API.' },
-    { icon: 'metadata', title: 'Metadata Extraction', description: 'Download app name, version, ratings, and description.' },
+    { icon: 'metadata', title: 'Metadata Extraction', description: 'Download app name, version, ratings, anddescription.' },
     { icon: 'api', title: 'Full-Featured API', description: 'Integrate our screenshot service directly into your workflow.' },
 ];
 
 const Features: React.FC = () => {
     return (
-        <section id="features" className="py-20 bg-gray-50">
-            <div className="container mx-auto px-6">
+        <sectionid="features" className="py-20 bg-gray-50">
+           <div className="container mx-auto px-6">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                        An All-in-One Screenshot Solution
+                       An All-in-One Screenshot Solution
                     </h2>
                     <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
                         We provide all the tools you need to streamline your app analysis and marketing efforts.
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <divclassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {features.map((feature) => (
                         <div key={feature.title} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-lg transition-shadow">
                             <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary-50 mb-6">
                                 <FeatureIcon icon={feature.icon} />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                            <p className="text-gray-600">{feature.description}</p>
+                            <pclassName="text-gray-600">{feature.description}</p>
                         </div>
                     ))}
                 </div>
@@ -224,25 +264,25 @@ const pricingPlans = [
         name: 'Free',
         price: '$0',
         description: 'Perfect for getting started.',
-        features: ['10 downloads per month', 'Single app processing', 'Standard resolution', 'Email support'],
+        features: ['10 downloads per month', 'Single app processing', 'Standard resolution','Email support'],
         popular: false,
     },
     {
         name: 'Starter',
         price: '$19',
         description: 'For individuals and small teams.',
-        features: ['100 downloads per month', 'Batch processing (up to 5 apps)', 'High resolution downloads', 'API access (1000 req/mo)', 'Email support'],
+        features: ['100 downloads per month','Batch processing (up to 5 apps)', 'High resolution downloads', 'API access(1000 req/mo)', 'Email support'],
         popular: false,
     },
     {
         name: 'Professional',
         price: '$49',
         description: 'For power users and businesses.',
-        features: ['500 downloads per month', 'Batch processing (up to 20 apps)', 'All resolutions available', 'API access (10,000 req/mo)', 'Priority processing', 'Chrome extension access', 'Live chat support'],
+        features: ['500 downloads per month', 'Batch processing (up to 20apps)', 'All resolutions available', 'API access (10,000 req/mo)', 'Priority processing', 'Chrome extension access', 'Live chat support'],
         popular: true,
     },
     {
-        name: 'Enterprise',
+        name:'Enterprise',
         price: '$149',
         description: 'For large-scale operations.',
         features: ['Unlimited downloads', 'Unlimited batch processing', 'White-label API', 'Dedicated account manager', 'Custom integrations', 'Phone support'],
@@ -251,60 +291,88 @@ const pricingPlans = [
 ];
 
 const Pricing: React.FC = () => {
-    return (
-        <section id="pricing" className="py-20 bg-white">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                        Choose the Plan That's Right for You
-                    </h2>
-                    <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                        Simple, transparent pricing that scales with your needs. No hidden fees.
-                    </p>
+ const handleSelectPlan = async (planName: string)=> {
+    // In a real implementation, this would:
+    // 1. Check if user is logged in
+    // 2. Call paymentService.createCheckoutSession(planName)
+    // 3. Redirect to Stripe checkout
+    
+    if (planName=== 'Free') {
+      alert('You already have accessto the free plan!');
+      return;
+    }
+    
+    // Mock implementation - in a real app, you would integrate with Stripe
+    alert(`Redirecting to checkout for ${planName} plan! In a real app, this would open the Stripe payment page.`);
+    
+    // Example of how the real implementation would work:
+    /*
+    try {
+      const response = await paymentService.createCheckoutSession(planName.toLowerCase());
+      // Redirect to Stripe checkout
+      window.location.href = response.sessionId;
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('Failed to initiate checkout. Please try again.');
+    }
+    */
+  };
+
+  return (
+    <section id="pricing" className="py-20 bg-white">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xlfont-bold text-gray-900">
+            Choose the Plan That's Right for You
+          </h2>
+          <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+            Simple, transparent pricingthat scales with your needs. No hidden fees.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-stretch">
+          {pricingPlans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`rounded-xl border p-8 flex flex-col relative ${plan.popular ? 'border-primary-500 border-2' : 'border-gray-200'}`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3py-1 rounded-full">
+                 MOST POPULAR
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-stretch">
-                    {pricingPlans.map((plan) => (
-                        <div
-                            key={plan.name}
-                            className={`rounded-xl border p-8 flex flex-col relative ${plan.popular ? 'border-primary-500 border-2' : 'border-gray-200'}`}
-                        >
-                            {plan.popular && (
-                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
-                                    MOST POPULAR
-                                </div>
-                            )}
-                            <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                            <p className="text-gray-500 mt-2">{plan.description}</p>
-                            <div className="mt-6">
-                                <span className="text-5xl font-extrabold text-gray-900">{plan.price}</span>
-                                {plan.price !== '$0' && <span className="text-lg font-medium text-gray-500">/month</span>}
-                            </div>
-                            <ul className="mt-8 space-y-4 flex-grow">
-                                {plan.features.map((feature) => (
-                                    <li key={feature} className="flex items-start">
-                                        <CheckIcon className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-1" />
-                                        <span className="text-gray-600">{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <button
-                                className={`w-full mt-8 py-3 rounded-lg font-semibold ${plan.popular ? 'bg-primary text-white hover:bg-primary-700' : 'bg-primary-50 text-primary hover:bg-primary-100'}`}
-                            >
-                                Get Started
-                            </button>
-                        </div>
-                    ))}
-                </div>
+              )}
+              <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
+              <p className="text-gray-500 mt-2">{plan.description}</p>
+              <divclassName="mt-6">
+               <span className="text-5xl font-extrabold text-gray-900">{plan.price}</span>
+                {plan.price !== '$0' && <span className="text-lg font-medium text-gray-500">/month</span>}
+              </div>
+<ul className="mt-8 space-y-4 flex-grow">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start">
+                    <CheckIcon className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-1" />
+                    <spanclassName="text-gray-600">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleSelectPlan(plan.name)}
+                className={`w-full mt-8 py-3 rounded-lg font-semibold ${plan.popular ? 'bg-primary text-white hover:bg-primary-700' : 'bg-primary-50 text-primary hover:bg-primary-100'}`}
+             >
+                {plan.name === 'Free' ? 'Get Started' : 'Upgrade Now'}
+              </button>
             </div>
-        </section>
-    );
+          ))}
+        </div>
+     </div>
+    </section>
+  );
 };
 
 const ApiSection: React.FC = () => {
     return (
         <section id="api" className="py-20 bg-gray-50">
             <div className="container mx-auto px-6">
-                <div className="bg-gray-800 rounded-xl p-8 md:p-12 lg:flex items-center justify-between">
+                <div className="bg-gray-800rounded-xl p-8 md:p-12 lg:flexitems-center justify-between">
                     <div className="lg:w-1/2 text-white">
                         <h2 className="text-3xl font-bold mb-4">Powerful API & Chrome Extension</h2>
                         <p className="text-gray-300 mb-8 max-w-lg">
@@ -328,7 +396,7 @@ const ApiSection: React.FC = () => {
     url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.maps'
   })
 })`}
-                            </code></pre>
+</code></pre>
                         </div>
                     </div>
                 </div>
@@ -341,7 +409,7 @@ const ApiSection: React.FC = () => {
 const Footer: React.FC = () => {
     return (
         <footer className="bg-white border-t border-gray-200">
-            <div className="container mx-auto px-6 py-12">
+            <div className="container mx-autopx-6 py-12">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     <div>
                         <h4 className="font-bold text-gray-800 mb-4">Product</h4>
@@ -363,7 +431,7 @@ const Footer: React.FC = () => {
                     <div>
                         <h4 className="font-bold text-gray-800 mb-4">Legal</h4>
                         <ul className="space-y-2 text-gray-600">
-                            <li><a href="#" className="hover:text-primary">Terms of Service</a></li>
+                           <li><a href="#"className="hover:text-primary">Termsof Service</a></li>
                             <li><a href="#" className="hover:text-primary">Privacy Policy</a></li>
                         </ul>
                     </div>
@@ -374,24 +442,162 @@ const Footer: React.FC = () => {
                 <div className="mt-12 border-t border-gray-200 pt-8 text-center text-gray-500">
                     <p>&copy; {new Date().getFullYear()} AppScreens. All rights reserved.</p>
                 </div>
-            </div>
+</div>
         </footer>
     );
 };
 
 // --- Main App Component ---
-
 const App: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'home' | 'dashboard'>('home');
+  
+  // Simple routing function
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (window.location.hash === '#dashboard') {
+        setCurrentView('dashboard');
+      } else {
+        setCurrentView('home');
+      }
+    };
+
+    // Check initial route
+    handleRouteChange();
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleRouteChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+   };
+  }, []);
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return (
+          <div className="min-h-screen bg-gray-50 py-12">
+            <div className="container mx-auto px-6">
+              <div className="mb-8 flex justify-between items-center">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                  <p className="text-gray-600 mt-2">Manage your subscription and usage</p>
+                </div>
+                <buttononClick={() => {
+                   window.location.hash = '';
+                    setCurrentView('home');
+                  }}
+                  className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition"
+                >
+                  Back to Home
+                </button>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Subscription Details</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                 <div className="border border-gray-200 rounded-lg p-5">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Current Plan</h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-boldtext-primary">Free</span>
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                        CURRENT
+                      </span>
+                    </div>
+                    <p className="mt-2 text-gray-600">
+                      Renews on Never
+                    </p>
+                  </div>
+                  
+                  <div className="border border-gray-200 rounded-lg p-5">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Usage</h3>
+                    <div className="mb-2">
+<div className="flex justify-between text-sm text-gray-600 mb-1">
+                        <span>
+                          2 of 10 downloads used
+                        </span>
+                        <span>
+                          8 remaining
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div 
+                          className="bg-primary h-2.5 rounded-full" 
+                          style={{ width: '20%' }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upgrade Plan</h3>
+                  <p className="text-gray-600 mb-4">Upgrade to get more downloads and advanced features</p>
+                 <button
+                    onClick={() => {
+                      document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                      window.location.hash = '#pricing';
+                    }}
+                    className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
+                  >
+                    View Plans
+</button>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">API Access</h2>
+                <div className="border border-gray-200 rounded-lg p-5">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Your API Key</h3>
+                      <p className="text-gray-600 mt-1">Use thiskey to authenticate with our API</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText('sk_api_your_api_key_will_appear_here');
+                        alert('API key copied to clipboard!');
+                      }}
+                      className="bg-primary text-white px-4 py-2rounded-md hover:bg-primary-700 transition"
+                    >
+                      Copy Key
+                    </button>
+                  </div>
+                  <div className="mt-4 bg-gray-50 p-3 rounded font-mono text-sm">
+                    sk_api_your_api_key_will_appear_here
+                  </div>
+<div className="mt-4">
+                    <a 
+                      href="#" 
+                      className="text-primary hover:text-primary-700 font-medium"
+                    >
+                      View API Documentation →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+       );
+      default:
+        return (
+          <>
+            <Header />
+            <main>
+              <Hero />
+              <Features />
+              <Pricing />
+              <ApiSection />
+            </main>
+            <Footer />
+          </>
+        );
+    }
+  };
+
   return (
     <div className="bg-gray-50">
-        <Header />
-        <main>
-            <Hero />
-            <Features />
-            <Pricing />
-            <ApiSection />
-        </main>
-        <Footer />
+{renderCurrentView()}
     </div>
   );
 };
