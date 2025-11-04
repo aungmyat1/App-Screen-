@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braintree Integration Test</title>
+    <script src="https://js.braintreegateway.com/web/dropin/1.32.1/js/dropin.min.js"></script>
+</head>
+<body>
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1>Braintree Integration Test</h1>
+        
+        <div id="payment-form">
+            <h2>Select a Plan</h2>
+            <div style="margin-bottom: 20px;">
+                <button onclick="selectPlan('starter')" style="padding: 10px 20px; margin: 5px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Starter ($19)</button>
+                <button onclick="selectPlan('professional')" style="padding: 10px 20px; margin: 5px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Professional ($49)</button>
+                <button onclick="selectPlan('enterprise')" style="padding: 10px 20px; margin: 5px; background-color: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">Enterprise ($149)</button>
+            </div>
+            
+            <div id="selected-plan" style="margin-bottom: 20px; font-weight: bold;"></div>
+            
+            <div id="dropin-container"></div>
+            
+            <button id="submit-button" style="display: none; padding: 12px 30px; margin-top: 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Pay Now</button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px; padding: 15px; border-radius: 4px;"></div>
+    </div>
+
+    <script>
+        let clientToken = null;
+        let dropinInstance = null;
+        let selectedPlan = null;
+
+        // Fetch client token from backend
+        async function fetchClientToken() {
+            try {
+                const response = await fetch('/api/payments/client-token');
+                const data = await response.json();
+                clientToken = data.clientToken;
+                console.log('Client token fetched successfully');
+            } catch (error) {
+                console.error('Error fetching client token:', error);
+                showResult('Error fetching payment form. Please try again.', 'error');
+            }
+        }
+
+        // Initialize Braintree Drop-in
+        async function initializeDropin() {
+            if (!clientToken) {
+                await fetchClientToken();
+            }
+
+            if (!clientToken) return;
+
+            try {
+                dropinInstance = await braintree.dropin.create({
+                    authorization: clientToken,
+                    container: '#dropin-container',
+                    vaultManager: false
+                });
+
+                document.getElementById('submit-button').style.display = 'block';
+                console.log('Drop-in initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Drop-in:', error);
+                showResult('Error initializing payment form. Please try again.', 'error');
+            }
+        }
+
+        // Select a plan
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            document.getElementById('selected-plan').textContent = `Selected Plan: ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
+            
+            // Initialize the payment form when a plan is selected
+            initializeDropin();
+        }
+
+        // Process payment
+        async function processPayment() {
+            if (!selectedPlan) {
+                showResult('Please select a plan first.', 'error');
+                return;
+            }
+
+            if (!dropinInstance) {
+                showResult('Payment form not initialized. Please try again.', 'error');
+                return;
+            }
+
+            try {
+                // Disable submit button during processing
+                const submitButton = document.getElementById('submit-button');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Processing...';
+                
+                // Get payment method nonce
+                const payload = await dropinInstance.requestPaymentMethod();
+                
+                // Send to backend for processing
+                const response = await fetch('/api/payments/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        plan: selectedPlan,
+                        paymentMethodNonce: payload.nonce
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(`Payment successful! Transaction ID: ${result.transactionId}`, 'success');
+                    // Reset form
+                    dropinInstance.teardown();
+                    document.getElementById('dropin-container').innerHTML = '';
+                    document.getElementById('submit-button').style.display = 'none';
+                    document.getElementById('selected-plan').textContent = '';
+                    selectedPlan = null;
+                } else {
+                    showResult(`Payment failed: ${result.message || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                showResult('Payment processing failed. Please try again.', 'error');
+            } finally {
+                // Re-enable submit button
+                const submitButton = document.getElementById('submit-button');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Pay Now';
+            }
+        }
+
+        // Show result message
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+            resultDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+            resultDiv.style.border = `1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'}`;
+        }
+
+        // Event listener for submit button
+        document.getElementById('submit-button').addEventListener('click', processPayment);
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            console.log('Page loaded. Waiting for plan selection...');
+        });
+    </script>
+</body>
+</html>

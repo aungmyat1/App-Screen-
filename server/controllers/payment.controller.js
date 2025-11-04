@@ -40,6 +40,7 @@ const createTransaction = async (req, res) => {
       // Update user subscription
       const user = req.user;
       user.subscription.plan = plan;
+      user.subscription.braintreeSubscriptionId = transactionResult.transaction.id;
       
       // Set expiration date (monthly subscription)
       const expiresAt = new Date();
@@ -85,22 +86,27 @@ const handleWebhook = async (req, res) => {
       case braintree.WebhookNotification.Kind.SubscriptionWentActive:
         // Handle subscription activation
         console.log('Subscription activated:', webhookNotification.subscription);
+        // You could send a welcome email or trigger other actions
         break;
         
       case braintree.WebhookNotification.Kind.SubscriptionCanceled:
         // Handle subscription cancellation
         console.log('Subscription canceled:', webhookNotification.subscription);
-        // You might want to downgrade the user to free plan
+        // Downgrade the user to free plan
+        await downgradeUserSubscription(webhookNotification.subscription.id);
         break;
         
       case braintree.WebhookNotification.Kind.SubscriptionChargedSuccessfully:
         // Handle successful charges
         console.log('Subscription charged successfully:', webhookNotification.subscription);
+        // Extend subscription period
+        await extendUserSubscription(webhookNotification.subscription.id);
         break;
         
       case braintree.WebhookNotification.Kind.SubscriptionChargedUnsuccessfully:
         // Handle failed charges
         console.log('Subscription charged unsuccessfully:', webhookNotification.subscription);
+        // Notify user about payment failure
         break;
         
       case braintree.WebhookNotification.Kind.Check:
@@ -116,6 +122,39 @@ const handleWebhook = async (req, res) => {
   } catch (error) {
     console.error('Webhook handling error:', error);
     res.status(500).json({ message: 'Error handling webhook' });
+  }
+};
+
+// Helper function to downgrade user subscription to free when canceled
+const downgradeUserSubscription = async (subscriptionId) => {
+  try {
+    const user = await User.findOne({ 'subscription.braintreeSubscriptionId': subscriptionId });
+    if (user) {
+      user.subscription.plan = 'free';
+      user.subscription.expiresAt = null;
+      user.downloadLimit = plans.free.downloadLimit;
+      await user.save();
+      console.log(`User ${user._id} downgraded to free plan`);
+    }
+  } catch (error) {
+    console.error('Error downgrading user subscription:', error);
+  }
+};
+
+// Helper function to extend user subscription when charged successfully
+const extendUserSubscription = async (subscriptionId) => {
+  try {
+    const user = await User.findOne({ 'subscription.braintreeSubscriptionId': subscriptionId });
+    if (user && user.subscription.plan !== 'free') {
+      // Extend expiration date by 1 month
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+      user.subscription.expiresAt = expiresAt;
+      await user.save();
+      console.log(`User ${user._id} subscription extended`);
+    }
+  } catch (error) {
+    console.error('Error extending user subscription:', error);
   }
 };
 

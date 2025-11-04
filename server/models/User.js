@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
     expiresAt: {
       type: Date
     },
-    stripeCustomerId: {
+    braintreeSubscriptionId: {
       type: String
     }
   },

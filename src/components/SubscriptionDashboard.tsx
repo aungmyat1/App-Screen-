@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import paymentService from '../services/paymentService';
+import BraintreePaymentForm from './BraintreePaymentForm';
 
 interface SubscriptionDetails {
   plan: string;
@@ -15,6 +16,8 @@ const SubscriptionDashboard: React.FC = () => {
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradeForm, setShowUpgradeForm] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -23,7 +26,8 @@ const SubscriptionDashboard: React.FC = () => {
         const data = await paymentService.getSubscription();
         setSubscription(data);
       } catch (err) {
-        setError('Failed to load subscription details');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load subscription details';
+        setError(errorMessage);
         console.error('Error fetching subscription:', err);
       } finally {
         setLoading(false);
@@ -33,17 +37,20 @@ const SubscriptionDashboard: React.FC = () => {
     fetchSubscription();
   }, []);
 
-  const handleUpgrade = async (newPlan: string) => {
-    try {
-      // In a real implementation, this would redirect to Stripe checkout
-      const response = await paymentService.createCheckoutSession(newPlan);
-      // Redirect to Stripe checkout page
-      // window.location.href = `https://checkout.stripe.com/pay/${response.sessionId}`;
-      alert(`In a real implementation, this would redirect to Stripe checkout for the ${newPlan} plan`);
-    } catch (err) {
-      alert('Failed to initiate upgrade. Please try again.');
-      console.error('Error upgrading plan:', err);
-    }
+  const handleUpgrade = (newPlan: string) => {
+    setSelectedPlan(newPlan);
+    setShowUpgradeForm(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowUpgradeForm(false);
+    // Refresh subscription details
+    window.location.reload();
+  };
+
+  const handlePaymentError = (errorMessage: string) => {
+    // Error is displayed in the payment form, no need to alert here
+    console.error('Payment error:', errorMessage);
   };
 
   const formatDate = (dateString: string) => {
@@ -64,7 +71,7 @@ const SubscriptionDashboard: React.FC = () => {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="text-center py-8">
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500">Error: {error}</p>
           <button 
             onClick={() => window.location.reload()}
             className="mt-4 bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition"
@@ -72,6 +79,29 @@ const SubscriptionDashboard: React.FC = () => {
             Try Again
           </button>
         </div>
+      </div>
+    );
+  }
+
+  if (showUpgradeForm) {
+    return (
+      <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Upgrade Plan</h2>
+          <button 
+            onClick={() => setShowUpgradeForm(false)}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <BraintreePaymentForm 
+          plan={selectedPlan}
+          onPaymentSuccess={handlePaymentSuccess}
+          onPaymentError={handlePaymentError}
+        />
       </div>
     );
   }
@@ -93,11 +123,18 @@ const SubscriptionDashboard: React.FC = () => {
     'enterprise': 'Enterprise'
   };
 
-  const planLimits: Record<string, number> = {
+  const planPrices: Record<string, number> = {
+    'free': 0,
+    'starter': 19,
+    'professional': 49,
+    'enterprise': 149
+  };
+
+  const planLimits: Record<string, number | string> = {
     'free': 10,
     'starter': 100,
     'professional': 500,
-    'enterprise': Infinity
+    'enterprise': 'Unlimited'
   };
 
   const isUnlimited = subscription.downloadLimit === Infinity;
@@ -120,6 +157,9 @@ const SubscriptionDashboard: React.FC = () => {
               {subscription.plan === 'enterprise' ? 'ACTIVE' : 'CURRENT'}
             </span>
           </div>
+          <p className="mt-2 text-gray-600">
+            ${planPrices[subscription.plan] || 0}/month
+          </p>
           {subscription.expiresAt && (
             <p className="mt-2 text-gray-600">
               Renews on {formatDate(subscription.expiresAt)}
@@ -155,10 +195,13 @@ const SubscriptionDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Object.entries(planNames).map(([planKey, planName]) => (
             planKey !== subscription.plan && (
-              <div key={planKey} className="border border-gray-200 rounded-lg p-4">
+              <div key={planKey} className="border border-gray-200 rounded-lg p-4 hover:border-primary transition">
                 <h4 className="font-medium text-gray-900">{planName}</h4>
                 <p className="text-sm text-gray-600 mt-1">
-                  {planLimits[planKey] === Infinity ? 'Unlimited downloads' : `${planLimits[planKey]} downloads/month`}
+                  {planLimits[planKey] === 'Unlimited' ? 'Unlimited downloads' : `${planLimits[planKey]} downloads/month`}
+                </p>
+                <p className="text-lg font-bold text-gray-900 mt-2">
+                  ${planPrices[planKey]}/month
                 </p>
                 <button
                   onClick={() => handleUpgrade(planKey)}
@@ -174,7 +217,11 @@ const SubscriptionDashboard: React.FC = () => {
         {subscription.plan !== 'free' && (
           <div className="mt-6">
             <button 
-              onClick={() => alert('In a real implementation, this would open a cancellation confirmation dialog')}
+              onClick={() => {
+                if (confirm('Are you sure you want to cancel your subscription?')) {
+                  alert('In a real implementation, this would open a cancellation confirmation dialog');
+                }
+              }}
               className="text-red-600 hover:text-red-800 text-sm font-medium"
             >
               Cancel Subscription

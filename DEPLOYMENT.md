@@ -10,14 +10,64 @@ This guide explains how to deploy the AppScreens application to a production env
 4. A domain name (for production deployment)
 5. SSL certificate (for HTTPS, recommended)
 
+## Free Domain Providers
+
+To get a free domain for your application, you can use one of these providers:
+
+### 1. Freenom
+- Provides free domains with extensions like .tk, .ml, .ga, .cf
+- Requires renewal every 12 months
+- Visit: https://www.freenom.com
+
+### 2. EU.org
+- Offers free subdomains
+- More stable than Freenom
+- Visit: https://nic.eu.org
+
+### 3. No-IP
+- Provides free subdomains with dynamic DNS
+- Visit: https://www.noip.com
+
+### 4. DuckDNS
+- Free subdomains with automated updates
+- Visit: https://www.duckdns.org
+
+## Free Deployment Platforms
+
+### 1. Render (Recommended)
+- Free tier with web services and databases
+- Automatic SSL certificates
+- Easy deployment from GitHub
+- Visit: https://render.com
+
+### 2. Railway
+- Free tier with $5 credit monthly
+- Easy deployment with Docker support
+- Automatic SSL
+- Visit: https://railway.app
+
+### 3. Heroku
+- Free tier with some limitations
+- Easy deployment from GitHub
+- Automatic SSL with custom domains (paid)
+- Visit: https://heroku.com
+
+### 4. Vercel
+- Excellent for frontend deployment
+- Serverless functions for backend
+- Automatic SSL
+- Visit: https://vercel.com
+
 ## Environment Variables
 
 Before deploying, make sure to configure all environment variables in the `.env.production` file:
 
 - `MONGODB_URI`: Your production MongoDB connection string
 - `JWT_SECRET`: A secure secret key for JWT token generation
-- `STRIPE_SECRET_KEY`: Your Stripe live secret key
-- `STRIPE_WEBHOOK_SECRET`: Your Stripe webhook signing secret
+- `BRAINTREE_MERCHANT_ID`: Your Braintree merchant ID
+- `BRAINTREE_PUBLIC_KEY`: Your Braintree public key
+- `BRAINTREE_PRIVATE_KEY`: Your Braintree private key
+- `BRAINTREE_ENVIRONMENT`: Set to "Production" for live transactions
 - `FRONTEND_URL`: Your frontend application URL
 
 ## Deployment Options
@@ -57,7 +107,7 @@ Before deploying, make sure to configure all environment variables in the `.env.
    ```bash
    export MONGODB_URI=your_production_mongodb_uri
    export JWT_SECRET=your_jwt_secret
-   export STRIPE_SECRET_KEY=your_stripe_secret_key
+   export BRAINTREE_MERCHANT_ID=your_braintree_merchant_id
    # ... other environment variables
    ```
 
@@ -80,16 +130,18 @@ Before deploying, make sure to configure all environment variables in the `.env.
 
 3. Serve the built files using a web server like Nginx or Apache.
 
-## Setting up Stripe Webhooks
+## Setting up Braintree Webhooks
 
-For the payment system to work correctly, you need to set up Stripe webhooks:
+For the payment system to work correctly, you need to set up Braintree webhooks:
 
-1. In your Stripe Dashboard, go to Developers > Webhooks.
+1. In your Braintree Dashboard, go to Settings > Webhooks.
 2. Add a new endpoint with the URL: `https://yourdomain.com/api/payments/webhook`
 3. Select the following events:
-   - `checkout.session.completed`
-   - `customer.subscription.deleted`
-4. Copy the webhook signing secret and add it to your `STRIPE_WEBHOOK_SECRET` environment variable.
+   - Subscription Charged Successfully
+   - Subscription Charged Unsuccessfully
+   - Subscription Canceled
+   - Subscription Expired
+4. Copy the webhook signing secret and add it to your environment variables.
 
 ## Domain and SSL Configuration
 
@@ -103,7 +155,7 @@ For production use, configure your domain and SSL certificate:
 
 1. Set up logging for both frontend and backend applications.
 2. Monitor MongoDB performance and set up backups.
-3. Monitor Stripe transactions and handle failed payments.
+3. Monitor Braintree transactions and handle failed payments.
 4. Regularly update dependencies to ensure security.
 
 ## Scaling Considerations

@@ -4,47 +4,55 @@
 
 # AppScreens - App Screenshot Downloader
 
-AppScreens is a service that allows users to download app screenshots from the Apple App Store and Google Play Store. This repository contains both the frontend React application and the backend Node.js API with Stripe payment integration.
+AppScreens is a service that allows users to download app screenshots from the Apple App Store and Google Play Store. This repository contains both the frontend React application and the backend Node.js API with Braintree payment integration.
 
 ## Features
 
 - Download screenshots from App Store and Google Play Store
 - User authentication and account management
-- Subscription-based payment system with Stripe
+- Subscription-based payment system with Braintree
 - API access for programmatic usage
 - Batch processing for multiple apps
 
 ## Run Locally
 
-**Prerequisites:** Node.js, MongoDB
+**Prerequisites:** Node.js (18+), Docker (optional for compose), MongoDB (local or Atlas)
 
-### Frontend
+### Frontend (development)
 
 1. Install dependencies:
-   ```bash
+   ```powershell
    npm install
    ```
-2. Run the app:
-   ```bash
+2. Run the dev server:
+   ```powershell
    npm run dev
    ```
 
-### Backend
+### Backend (development)
 
 1. Navigate to the server directory:
-   ```bash
+   ```powershell
    cd server
    ```
 2. Install dependencies:
-   ```bash
+   ```powershell
    npm install
    ```
-3. Set up MongoDB (either locally or using a cloud service like MongoDB Atlas)
-4. Update the [.env](server/.env) file with your configuration
-5. Run the server:
-   ```bash
+3. Create a local `.env` (use `server/.env.example` as a template) and set your secrets.
+4. Run the server:
+   ```powershell
    npm run dev
    ```
+
+### Run with Docker Compose (recommended for local integration)
+
+1. Copy `server/.env.example` to `server/.env` and fill in secrets locally (do NOT commit this file).
+2. Start services:
+   ```powershell
+   docker-compose up --build
+   ```
+
 
 ## Deployment
 
@@ -56,6 +64,23 @@ AppScreens is a service that allows users to download app screenshots from the A
    ```bash
    docker-compose up -d
    ```
+
+### Free Deployment Options
+
+#### Render (Recommended)
+1. Fork this repository
+2. Sign up at [Render](https://render.com)
+3. Create a new Web Service
+4. Connect your repository
+5. Configure environment variables
+6. Deploy!
+
+#### Railway
+1. Fork this repository
+2. Sign up at [Railway](https://railway.app)
+3. Create a new project
+4. Deploy from your repository
+5. Configure environment variables
 
 ### Manual Deployment
 
@@ -71,6 +96,13 @@ AppScreens is a service that allows users to download app screenshots from the A
    npm start
    ```
 
+## Free Domain Providers
+
+- [Freenom](https://www.freenom.com) - Free domains with .tk, .ml, .ga, .cf extensions
+- [EU.org](https://nic.eu.org) - Free subdomains
+- [No-IP](https://www.noip.com) - Free subdomains with dynamic DNS
+- [DuckDNS](https://www.duckdns.org) - Free subdomains with automated updates
+
 ## Project Structure
 
 - `/` - Frontend React application
@@ -82,7 +114,7 @@ AppScreens is a service that allows users to download app screenshots from the A
 
 ## Monetization
 
-The application uses Stripe for payment processing with multiple subscription tiers:
+The application uses Braintree for payment processing with multiple subscription tiers:
 - Free: 10 downloads per month
 - Starter: $19/month for 100 downloads
 - Professional: $49/month for 500 downloads
