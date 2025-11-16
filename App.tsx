@@ -16,6 +16,12 @@ const CopyIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) =
     </svg>
 );
 
+const StarIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className}>
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+);
+
 
 const AppStoreIcon: React.FC<{ className?: string }> = ({ className = 'h-6 w-6' }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -119,21 +125,21 @@ const HighlightMatch: React.FC<{ text: string; query: string }> = ({ text, query
 
 
 // --- Mock Data & API ---
-type AppSuggestion = { name: string; publisher: string; icon: string; url: string; store: 'google' | 'apple'; };
+type AppSuggestion = { name: string; publisher: string; icon: string; url: string; store: 'google' | 'apple'; rating?: number; downloads?: string; };
 
 const mockApps: AppSuggestion[] = [
     // Google Play
-    { name: 'Google Maps', publisher: 'Google LLC', icon: '🗺️', url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.maps', store: 'google' },
-    { name: 'Instagram', publisher: 'Meta Platforms, Inc.', icon: '📸', url: 'https://play.google.com/store/apps/details?id=com.instagram.android', store: 'google' },
-    { name: 'TikTok', publisher: 'TikTok Pte. Ltd.', icon: '🎵', url: 'https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically', store: 'google' },
-    { name: 'WhatsApp Messenger', publisher: 'WhatsApp LLC', icon: '💬', url: 'https://play.google.com/store/apps/details?id=com.whatsapp', store: 'google' },
-    { name: 'Spotify', publisher: 'Spotify AB', icon: '🎧', url: 'https://play.google.com/store/apps/details?id=com.spotify.music', store: 'google' },
-    { name: 'YouTube', publisher: 'Google LLC', icon: '▶️', url: 'https://play.google.com/store/apps/details?id=com.google.android.youtube', store: 'google' },
+    { name: 'Google Maps', publisher: 'Google LLC', icon: '🗺️', url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.maps', store: 'google', rating: 4.7, downloads: '5B+' },
+    { name: 'Instagram', publisher: 'Meta Platforms, Inc.', icon: '📸', url: 'https://play.google.com/store/apps/details?id=com.instagram.android', store: 'google', rating: 4.5, downloads: '5B+' },
+    { name: 'TikTok', publisher: 'TikTok Pte. Ltd.', icon: '🎵', url: 'https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically', store: 'google', rating: 4.4, downloads: '1B+' },
+    { name: 'WhatsApp Messenger', publisher: 'WhatsApp LLC', icon: '💬', url: 'https://play.google.com/store/apps/details?id=com.whatsapp', store: 'google', rating: 4.3, downloads: '5B+' },
+    { name: 'Spotify', publisher: 'Spotify AB', icon: '🎧', url: 'https://play.google.com/store/apps/details?id=com.spotify.music', store: 'google', rating: 4.6, downloads: '1B+' },
+    { name: 'YouTube', publisher: 'Google LLC', icon: '▶️', url: 'https://play.google.com/store/apps/details?id=com.google.android.youtube', store: 'google', rating: 4.5, downloads: '10B+' },
     // Apple App Store
-    { name: 'Procreate', publisher: 'Savage Interactive Pty Ltd', icon: '🖌️', url: 'https://apps.apple.com/us/app/procreate/id425073498', store: 'apple' },
-    { name: 'Notability', publisher: 'Ginger Labs', icon: '📝', url: 'https://apps.apple.com/us/app/notability/id360593530', store: 'apple' },
-    { name: 'Goodnotes 6', publisher: 'Time Base Technology Limited', icon: '📓', url: 'https://apps.apple.com/us/app/goodnotes-6/id1444383602', store: 'apple' },
-    { name: 'Things 3', publisher: 'Cultured Code GmbH & Co. KG', icon: '✅', url: 'https://apps.apple.com/us/app/things-3/id904280696', store: 'apple' },
+    { name: 'Procreate', publisher: 'Savage Interactive Pty Ltd', icon: '🖌️', url: 'https://apps.apple.com/us/app/procreate/id425073498', store: 'apple', rating: 4.5, downloads: '10M+' },
+    { name: 'Notability', publisher: 'Ginger Labs', icon: '📝', url: 'https://apps.apple.com/us/app/notability/id360593530', store: 'apple', rating: 4.7, downloads: '10M+' },
+    { name: 'Goodnotes 6', publisher: 'Time Base Technology Limited', icon: '📓', url: 'https://apps.apple.com/us/app/goodnotes-6/id1444383602', store: 'apple', rating: 4.8, downloads: '5M+' },
+    { name: 'Things 3', publisher: 'Cultured Code GmbH & Co. KG', icon: '✅', url: 'https://apps.apple.com/us/app/things-3/id904280696', store: 'apple', rating: 4.8, downloads: '1M+' },
 ];
 
 const fetchAppSuggestions = async (query: string, store: 'google' | 'apple'): Promise<AppSuggestion[]> => {
@@ -527,18 +533,32 @@ const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') =
                                             tabIndex={-1}
                                             onClick={() => handleSuggestionClick(app)}
                                             onMouseEnter={() => setActiveIndex(index)}
-                                            className={`p-4 flex items-center space-x-4 cursor-pointer focus:outline-none ${
+                                            className={`p-4 flex items-start space-x-4 cursor-pointer focus:outline-none ${
                                                 index === activeIndex ? 'bg-primary-50 dark:bg-primary-900/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                             }`}
                                         >
-                                            <span className="text-2xl" aria-hidden="true">{app.icon}</span>
-                                            <div>
+                                            <span className="text-3xl mt-1" aria-hidden="true">{app.icon}</span>
+                                            <div className="flex-1">
                                                 <p className="font-semibold text-gray-800 dark:text-gray-100">
                                                     <HighlightMatch text={app.name} query={appUrl} />
                                                 </p>
                                                 <p className="text-sm text-gray-500 dark:text-gray-400">
                                                     <HighlightMatch text={app.publisher} query={appUrl} />
                                                 </p>
+                                                {(app.rating || app.downloads) && (
+                                                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                                                        {app.rating && (
+                                                            <span className="flex items-center">
+                                                                <StarIcon className="w-4 h-4 text-yellow-500 mr-1" />
+                                                                <span className="font-semibold text-gray-700 dark:text-gray-200">{app.rating.toFixed(1)}</span>
+                                                            </span>
+                                                        )}
+                                                        {app.rating && app.downloads && <span className="mx-1.5">&bull;</span>}
+                                                        {app.downloads && (
+                                                            <span>{app.downloads} downloads</span>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </li>
                                     ))}
