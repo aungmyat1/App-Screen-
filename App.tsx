@@ -419,28 +419,51 @@ const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') =
              return;
         }
 
-        // Regex patterns for IDs
-        const googlePackageIdPattern = /^([a-zA-Z0-9_]+\.)+[a-zA-Z0-9_]+$/; 
-        const appleAppIdPattern = /^\d{9,10}$/; 
+        // Regex patterns
+        // Google IDs: com.example.app (segments separated by dots, usually starting with letter)
+        const googlePackageIdPattern = /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z0-9_]+)+$/; 
+        // Apple IDs: 9-11 digits, potentially prefixed with 'id'
+        const appleAppIdPattern = /^(\d{9,11}|id\d{9,11})$/;
 
         let finalUrl = '';
         let detectedType: 'url' | 'google_id' | 'apple_id' | 'search' = 'search';
         let urlObj: URL | null = null;
 
-        // Detect Input Type
-        try {
-            urlObj = new URL(trimmedInput);
-            detectedType = 'url';
-        } catch (_) {
-            if (googlePackageIdPattern.test(trimmedInput)) detectedType = 'google_id';
-            else if (appleAppIdPattern.test(trimmedInput)) detectedType = 'apple_id';
-            else detectedType = 'search';
+        // 1. Check for explicit Protocol (http:// or https://)
+        if (/^[a-zA-Z]+:\/\//.test(trimmedInput)) {
+            try {
+                urlObj = new URL(trimmedInput);
+                detectedType = 'url';
+            } catch (e) {
+                setError("The URL provided is invalid.");
+                setIsLoading(false); return;
+            }
+        } else {
+            // 2. No protocol -> Check specific ID patterns first
+            if (googlePackageIdPattern.test(trimmedInput)) {
+                detectedType = 'google_id';
+            } else if (appleAppIdPattern.test(trimmedInput)) {
+                detectedType = 'apple_id';
+            } else if (trimmedInput.includes('.') && !/\s/.test(trimmedInput)) {
+                 // 3. Has dot, no spaces, not an ID -> Likely a URL without protocol
+                 try {
+                     urlObj = new URL(`https://${trimmedInput}`);
+                     detectedType = 'url';
+                 } catch {
+                     detectedType = 'search';
+                 }
+            } else {
+                // 4. Fallback to search
+                detectedType = 'search';
+            }
         }
+
+        // --- Specific Validation Logic ---
 
         if (detectedType === 'url' && urlObj) {
             const hostname = urlObj.hostname.toLowerCase();
             
-            // Google Play URL Validation
+            // Google Play Validation
             if (hostname.includes('play.google.com')) {
                 if (selectedStore !== 'google') {
                     setError("You provided a Google Play URL, but the Apple App Store is selected. Please switch to the Google Play tab.");
@@ -448,27 +471,27 @@ const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') =
                 }
                 const id = urlObj.searchParams.get('id');
                 if (!id) {
-                    setError("Invalid Google Play URL. The URL must contain an 'id' parameter (e.g., ...?id=com.example).");
+                    setError("Invalid Google Play URL. It must contain an 'id' parameter (e.g., ...?id=com.example).");
                     setIsLoading(false); return;
                 }
-                finalUrl = trimmedInput;
+                finalUrl = urlObj.toString();
             } 
-            // Apple App Store URL Validation
+            // Apple App Store Validation
             else if (hostname.includes('apps.apple.com')) {
                 if (selectedStore !== 'apple') {
                     setError("You provided an Apple App Store URL, but Google Play is selected. Please switch to the Apple App Store tab.");
                     setIsLoading(false); return;
                 }
-                // Path usually: /country/app/name/id123456
+                // Apple IDs are usually in the path like /id123456
                 const pathParts = urlObj.pathname.split('/');
-                const idPart = pathParts.find(part => part.startsWith('id') && /^\d+$/.test(part.substring(2)));
+                const idPart = pathParts.find(part => /^id\d+$/.test(part));
                 if (!idPart) {
-                    setError("Invalid Apple App Store URL. The URL must contain an app ID (e.g., .../id123456789).");
+                    setError("Invalid Apple App Store URL. It must contain an app ID (e.g., .../id123456789).");
                     setIsLoading(false); return;
                 }
-                finalUrl = trimmedInput;
+                finalUrl = urlObj.toString();
             } else {
-                setError("Unsupported URL. We only support URLs from play.google.com and apps.apple.com.");
+                setError(`The domain '${hostname}' is not supported. Please use a URL from play.google.com or apps.apple.com.`);
                 setIsLoading(false); return;
             }
         } 
@@ -484,7 +507,8 @@ const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') =
                 setError(`"${trimmedInput}" looks like an Apple App ID. Please switch to the Apple App Store tab.`);
                 setIsLoading(false); return;
             }
-            finalUrl = `https://apps.apple.com/us/app/id${trimmedInput}`;
+            const cleanId = trimmedInput.replace(/^id/, '');
+            finalUrl = `https://apps.apple.com/app/id${cleanId}`;
         }
         else { // Search
              try {
