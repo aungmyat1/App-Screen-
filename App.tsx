@@ -149,11 +149,21 @@ const mockApps: AppSuggestion[] = [
     { name: 'WhatsApp Messenger', publisher: 'WhatsApp LLC', icon: '💬', url: 'https://play.google.com/store/apps/details?id=com.whatsapp', store: 'google', rating: 4.3, downloads: '5B+' },
     { name: 'Spotify', publisher: 'Spotify AB', icon: '🎧', url: 'https://play.google.com/store/apps/details?id=com.spotify.music', store: 'google', rating: 4.6, downloads: '1B+' },
     { name: 'YouTube', publisher: 'Google LLC', icon: '▶️', url: 'https://play.google.com/store/apps/details?id=com.google.android.youtube', store: 'google', rating: 4.5, downloads: '10B+' },
+    { name: 'Facebook', publisher: 'Meta Platforms, Inc.', icon: '📘', url: 'https://play.google.com/store/apps/details?id=com.facebook.katana', store: 'google', rating: 4.1, downloads: '5B+' },
+    { name: 'Snapchat', publisher: 'Snap Inc.', icon: '👻', url: 'https://play.google.com/store/apps/details?id=com.snapchat.android', store: 'google', rating: 4.2, downloads: '1B+' },
+    { name: 'Netflix', publisher: 'Netflix, Inc.', icon: '🍿', url: 'https://play.google.com/store/apps/details?id=com.netflix.mediaclient', store: 'google', rating: 4.4, downloads: '1B+' },
+    { name: 'Discord', publisher: 'Discord Inc.', icon: '🎮', url: 'https://play.google.com/store/apps/details?id=com.discord', store: 'google', rating: 4.3, downloads: '500M+' },
     // Apple App Store
     { name: 'Procreate', publisher: 'Savage Interactive Pty Ltd', icon: '🖌️', url: 'https://apps.apple.com/us/app/procreate/id425073498', store: 'apple', rating: 4.5, downloads: '10M+' },
     { name: 'Notability', publisher: 'Ginger Labs', icon: '📝', url: 'https://apps.apple.com/us/app/notability/id360593530', store: 'apple', rating: 4.7, downloads: '10M+' },
     { name: 'Goodnotes 6', publisher: 'Time Base Technology Limited', icon: '📓', url: 'https://apps.apple.com/us/app/goodnotes-6/id1444383602', store: 'apple', rating: 4.8, downloads: '5M+' },
     { name: 'Things 3', publisher: 'Cultured Code GmbH & Co. KG', icon: '✅', url: 'https://apps.apple.com/us/app/things-3/id904280696', store: 'apple', rating: 4.8, downloads: '1M+' },
+    { name: 'ChatGPT', publisher: 'OpenAI', icon: '🤖', url: 'https://apps.apple.com/us/app/chatgpt/id6448311069', store: 'apple', rating: 4.9, downloads: '50M+' },
+    { name: 'TikTok', publisher: 'TikTok Pte. Ltd.', icon: '🎵', url: 'https://apps.apple.com/us/app/tiktok/id835599320', store: 'apple', rating: 4.7, downloads: '1B+' },
+    { name: 'Instagram', publisher: 'Instagram, Inc.', icon: '📸', url: 'https://apps.apple.com/us/app/instagram/id389801252', store: 'apple', rating: 4.7, downloads: '1B+' },
+    { name: 'YouTube: Watch, Listen, Stream', publisher: 'Google LLC', icon: '▶️', url: 'https://apps.apple.com/us/app/youtube-watch-listen-stream/id544007664', store: 'apple', rating: 4.7, downloads: '1B+' },
+    { name: 'CapCut - Video Editor', publisher: 'Bytedance Pte. Ltd', icon: '🎬', url: 'https://apps.apple.com/us/app/capcut-video-editor/id1500855883', store: 'apple', rating: 4.7, downloads: '100M+' },
+    { name: 'Duolingo', publisher: 'Duolingo', icon: '🦉', url: 'https://apps.apple.com/us/app/duolingo-language-lessons/id570060128', store: 'apple', rating: 4.7, downloads: '200M+' },
 ];
 
 const fetchAppSuggestions = async (query: string, store: 'google' | 'apple'): Promise<AppSuggestion[]> => {
@@ -167,7 +177,7 @@ const fetchAppSuggestions = async (query: string, store: 'google' | 'apple'): Pr
     return storeApps.filter(app =>
         app.name.toLowerCase().includes(lowerCaseQuery) ||
         app.publisher.toLowerCase().includes(lowerCaseQuery)
-    );
+    ).slice(0, 5); // Limit to top 5 suggestions
 };
 
 const DarkModeToggle: React.FC<{ isDarkMode: boolean; toggle: () => void }> = ({ isDarkMode, toggle }) => {
