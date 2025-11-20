@@ -22,6 +22,15 @@ const StarIcon: React.FC<{ className?: string }> = ({ className = 'w-4 h-4' }) =
     </svg>
 );
 
+const GoogleIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+);
+
 
 const AppStoreIcon: React.FC<{ className?: string }> = ({ className = 'h-6 w-6' }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -123,6 +132,11 @@ const HighlightMatch: React.FC<{ text: string; query: string }> = ({ text, query
     );
 };
 
+// --- App-specific Types ---
+type User = {
+    name: string;
+    avatarUrl: string;
+};
 
 // --- Mock Data & API ---
 type AppSuggestion = { name: string; publisher: string; icon: string; url: string; store: 'google' | 'apple'; rating?: number; downloads?: string; };
@@ -184,29 +198,87 @@ const DarkModeToggle: React.FC<{ isDarkMode: boolean; toggle: () => void }> = ({
 
 // --- Page Sections ---
 
-const Header: React.FC<{ isDarkMode: boolean; toggleDarkMode: () => void }> = ({ isDarkMode, toggleDarkMode }) => {
-  return (
-    <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="text-2xl font-bold text-gray-900 dark:text-white">
-          <span className="text-primary">App</span>Screens
-        </div>
-        <nav className="hidden md:flex space-x-8 items-center">
-          <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">Features</a>
-          <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">Pricing</a>
-          <a href="#api" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">API</a>
-        </nav>
-        <div className="flex items-center space-x-4">
-          <button type="button" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition hidden sm:block">Log In</button>
-          <button type="button" className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition shadow-sm">
-            Sign Up Free
-          </button>
-          <DarkModeToggle isDarkMode={isDarkMode} toggle={toggleDarkMode} />
-        </div>
-      </div>
-    </header>
-  );
+const Header: React.FC<{
+    isDarkMode: boolean;
+    toggleDarkMode: () => void;
+    currentUser: User | null;
+    onLogin: () => void;
+    onLogout: () => void;
+}> = ({ isDarkMode, toggleDarkMode, currentUser, onLogin, onLogout }) => {
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setIsProfileOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    return (
+        <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 dark:border-gray-800">
+          <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <span className="text-primary">App</span>Screens
+            </div>
+            <nav className="hidden md:flex space-x-8 items-center">
+              <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">Features</a>
+              <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">Pricing</a>
+              <a href="#api" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-400 transition">API</a>
+            </nav>
+            <div className="flex items-center space-x-4">
+                {currentUser ? (
+                    <div className="relative" ref={profileRef}>
+                        <button
+                            type="button"
+                            onClick={() => setIsProfileOpen(prev => !prev)}
+                            className="flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-full"
+                        >
+                            <img src={currentUser.avatarUrl} alt={currentUser.name} className="w-9 h-9 rounded-full" />
+                            <span className="hidden sm:inline text-gray-700 dark:text-gray-300 font-medium">{currentUser.name}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        {isProfileOpen && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 border border-gray-200 dark:border-gray-700 z-50">
+                                <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-700">
+                                    Signed in as <br />
+                                    <strong className="font-semibold">{currentUser.name}</strong>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        onLogout();
+                                        setIsProfileOpen(false);
+                                    }}
+                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                    Sign out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={onLogin}
+                        className="inline-flex items-center justify-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition shadow-sm font-semibold"
+                    >
+                        Sign In / Sign Up
+                    </button>
+                )}
+                <DarkModeToggle isDarkMode={isDarkMode} toggle={toggleDarkMode} />
+            </div>
+          </div>
+        </header>
+    );
 };
+
 
 const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') => void }> = ({ showToast }) => {
     const [appUrl, setAppUrl] = useState('');
@@ -339,63 +411,86 @@ const Hero: React.FC<{ showToast: (message: string, type: 'success' | 'error') =
         setError(null);
         setIsLoading(true);
 
-        const googlePlayUrlRegex = /^https:\/\/play\.google\.com\/store\/apps\/details\?id=([a-zA-Z0-9._-]+)/;
-        const appleStoreUrlRegex = /^https:\/\/apps\.apple\.com\/[a-z]{2,3}\/app\/[a-zA-Z0-9-]+\/id(\d+)/;
-        const googleIdRegex = /^([a-zA-Z0-9_]{1,}\.)+[a-zA-Z0-9_]{1,}$/;
-        const appleIdRegex = /^\d{9,10}$/;
-        
-        let finalUrl = '';
         const trimmedInput = appUrl.trim();
 
-        // --- Validation and URL construction ---
-        // A. Check for specific ID formats first
-        if (googleIdRegex.test(trimmedInput)) {
-            if (selectedStore === 'google') {
-                finalUrl = `https://play.google.com/store/apps/details?id=${trimmedInput}`;
-            } else {
-                setError("This looks like a Google Play ID. Please switch to the Google Play selector.");
-                setIsLoading(false); return;
-            }
-        } else if (appleIdRegex.test(trimmedInput)) {
-            if (selectedStore === 'apple') {
-                finalUrl = `https://apps.apple.com/us/app/id${trimmedInput}`;
-            } else {
-                setError("This looks like an Apple App ID. Please switch to the Apple App Store selector.");
-                setIsLoading(false); return;
-            }
+        if (!trimmedInput) {
+             setError("Please enter an App Name, ID, or URL.");
+             setIsLoading(false);
+             return;
         }
-        // B. If not an ID, check for full URLs
-        else if (trimmedInput.includes('play.google.com')) {
-            if (googlePlayUrlRegex.test(trimmedInput)) {
-                if (selectedStore === 'google') {
-                    finalUrl = trimmedInput;
-                } else {
-                    setError('Incorrect store selected. You provided a Google Play URL; please switch the selector.');
+
+        // Regex patterns for IDs
+        const googlePackageIdPattern = /^([a-zA-Z0-9_]+\.)+[a-zA-Z0-9_]+$/; 
+        const appleAppIdPattern = /^\d{9,10}$/; 
+
+        let finalUrl = '';
+        let detectedType: 'url' | 'google_id' | 'apple_id' | 'search' = 'search';
+        let urlObj: URL | null = null;
+
+        // Detect Input Type
+        try {
+            urlObj = new URL(trimmedInput);
+            detectedType = 'url';
+        } catch (_) {
+            if (googlePackageIdPattern.test(trimmedInput)) detectedType = 'google_id';
+            else if (appleAppIdPattern.test(trimmedInput)) detectedType = 'apple_id';
+            else detectedType = 'search';
+        }
+
+        if (detectedType === 'url' && urlObj) {
+            const hostname = urlObj.hostname.toLowerCase();
+            
+            // Google Play URL Validation
+            if (hostname.includes('play.google.com')) {
+                if (selectedStore !== 'google') {
+                    setError("You provided a Google Play URL, but the Apple App Store is selected. Please switch to the Google Play tab.");
                     setIsLoading(false); return;
                 }
-            } else {
-                setError("Invalid Google Play URL. Please use a full app details URL, e.g., '.../details?id=...'.");
-                setIsLoading(false); return;
-            }
-        } else if (trimmedInput.includes('apps.apple.com')) {
-            if (appleStoreUrlRegex.test(trimmedInput)) {
-                if (selectedStore === 'apple') {
-                    finalUrl = trimmedInput;
-                } else {
-                    setError('Incorrect store selected. You provided an Apple App Store URL; please switch the selector.');
+                const id = urlObj.searchParams.get('id');
+                if (!id) {
+                    setError("Invalid Google Play URL. The URL must contain an 'id' parameter (e.g., ...?id=com.example).");
                     setIsLoading(false); return;
                 }
+                finalUrl = trimmedInput;
+            } 
+            // Apple App Store URL Validation
+            else if (hostname.includes('apps.apple.com')) {
+                if (selectedStore !== 'apple') {
+                    setError("You provided an Apple App Store URL, but Google Play is selected. Please switch to the Apple App Store tab.");
+                    setIsLoading(false); return;
+                }
+                // Path usually: /country/app/name/id123456
+                const pathParts = urlObj.pathname.split('/');
+                const idPart = pathParts.find(part => part.startsWith('id') && /^\d+$/.test(part.substring(2)));
+                if (!idPart) {
+                    setError("Invalid Apple App Store URL. The URL must contain an app ID (e.g., .../id123456789).");
+                    setIsLoading(false); return;
+                }
+                finalUrl = trimmedInput;
             } else {
-                setError("Invalid Apple App Store URL. Please use a full app details URL, e.g., '.../app/app-name/id...'.");
+                setError("Unsupported URL. We only support URLs from play.google.com and apps.apple.com.");
                 setIsLoading(false); return;
             }
+        } 
+        else if (detectedType === 'google_id') {
+             if (selectedStore !== 'google') {
+                setError(`"${trimmedInput}" looks like a Google Play Package ID. Please switch to the Google Play tab.`);
+                setIsLoading(false); return;
+            }
+            finalUrl = `https://play.google.com/store/apps/details?id=${trimmedInput}`;
         }
-        // C. If not a recognized ID or URL, treat as a search term
-        else {
-            try {
+        else if (detectedType === 'apple_id') {
+            if (selectedStore !== 'apple') {
+                setError(`"${trimmedInput}" looks like an Apple App ID. Please switch to the Apple App Store tab.`);
+                setIsLoading(false); return;
+            }
+            finalUrl = `https://apps.apple.com/us/app/id${trimmedInput}`;
+        }
+        else { // Search
+             try {
                 const results = await fetchAppSuggestions(trimmedInput, selectedStore);
                 if (results.length > 0) {
-                    finalUrl = results[0].url; // Use the first result
+                    finalUrl = results[0].url; 
                 } else {
                     setError(`Could not find an app matching "${trimmedInput}" in the ${selectedStore === 'google' ? 'Google Play Store' : 'Apple App Store'}.`);
                     setIsLoading(false); return;
@@ -887,6 +982,217 @@ const Footer: React.FC = () => (
     </footer>
 );
 
+// --- Auth Modal ---
+const AuthModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onLoginSuccess: () => void;
+}> = ({ isOpen, onClose, onLoginSuccess }) => {
+    const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [apiError, setApiError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const modalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        
+        // Reset state on open
+        setMode('signin');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setErrors({});
+        setApiError(null);
+        
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose]);
+    
+    const validate = () => {
+        const newErrors: { [key: string]: string } = {};
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Email address is invalid';
+        }
+        if (!password) {
+            newErrors.password = 'Password is required';
+        } else if (mode === 'signup' && password.length < 8) {
+            newErrors.password = 'Password must be at least 8 characters';
+        }
+        if (mode === 'signup' && password !== confirmPassword) {
+            newErrors.confirmPassword = 'Passwords do not match';
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setApiError(null);
+        if (!validate()) {
+            return;
+        }
+
+        setIsLoading(true);
+
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        if (mode === 'signin' && (email !== 'test@example.com' || password !== 'password')) {
+            setApiError('Invalid email or password.');
+        } else {
+            onLoginSuccess();
+        }
+        
+        setIsLoading(false);
+    };
+    
+    if (!isOpen) return null;
+
+    return (
+        <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-modal-title"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={onClose}
+        >
+            <div
+                ref={modalRef}
+                className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-8"
+                onClick={e => e.stopPropagation()}
+            >
+                <button
+                    onClick={onClose}
+                    aria-label="Close dialog"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h2 id="auth-modal-title" className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-2">
+                    {mode === 'signin' ? 'Welcome Back!' : 'Create an Account'}
+                </h2>
+                <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+                    {mode === 'signin' ? 'Sign in to continue to AppScreens' : 'Get started with your free account'}
+                </p>
+
+                <form onSubmit={handleSubmit} noValidate>
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Email Address
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700`}
+                            />
+                            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                        </div>
+                        <div>
+                            <label
+                                htmlFor="password"
+                                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                                required
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700`}
+                            />
+                            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                        </div>
+                        {mode === 'signup' && (
+                            <div>
+                                <label
+                                    htmlFor="confirm-password"
+                                    className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                                >
+                                    Confirm Password
+                                </label>
+                                <input
+                                    id="confirm-password"
+                                    name="confirm-password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={e => setConfirmPassword(e.target.value)}
+                                    className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700`}
+                                />
+                                {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                            </div>
+                        )}
+                        {apiError && <p className="text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 p-3 rounded-md text-center">{apiError}</p>}
+                    </div>
+                    
+                    <div className="mt-6">
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+                        >
+                            {isLoading ? <LoadingSpinner /> : (mode === 'signin' ? 'Sign In' : 'Create Account')}
+                        </button>
+                    </div>
+                </form>
+
+                <div className="mt-6 relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
+                    </div>
+                </div>
+
+                <div className="mt-6">
+                    <button
+                        type="button"
+                        onClick={onLoginSuccess}
+                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
+                    >
+                        <GoogleIcon className="w-5 h-5 mr-2" />
+                        Sign in with Google
+                    </button>
+                </div>
+                
+                <div className="mt-6 text-center text-sm">
+                    <button onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')} className="font-medium text-primary hover:text-primary-500">
+                        {mode === 'signin' ? "Don't have an account? Sign Up" : 'Already have an account? Sign In'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const App: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error'; id: number } | null>(null);
@@ -898,6 +1204,8 @@ const App: React.FC = () => {
         }
         return window.matchMedia('(prefers-color-scheme: dark)').matches;
     });
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     useEffect(() => {
         if (isDarkMode) {
@@ -920,10 +1228,36 @@ const App: React.FC = () => {
     const handleCloseToast = () => {
         setToast(null);
     };
+
+    const handleLoginSuccess = () => {
+        // In a real app, this would trigger the Google OAuth flow.
+        // Here, we'll just simulate a successful login.
+        setCurrentUser({
+            name: "Alex Doe",
+            avatarUrl: "https://i.pravatar.cc/150?u=a042581f4e29026702e" // Using a random avatar
+        });
+        setIsAuthModalOpen(false);
+        showToast('Successfully signed in!', 'success');
+    };
+    
+    const handleOpenLoginModal = () => {
+        setIsAuthModalOpen(true);
+    };
+
+    const handleLogout = () => {
+        setCurrentUser(null);
+        showToast('You have been signed out.', 'success');
+    };
     
     return (
         <div className="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-200">
-            <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            <Header
+                isDarkMode={isDarkMode}
+                toggleDarkMode={toggleDarkMode}
+                currentUser={currentUser}
+                onLogin={handleOpenLoginModal}
+                onLogout={handleLogout}
+            />
             <main>
                 <Hero showToast={showToast} />
                 <Features />
@@ -933,6 +1267,11 @@ const App: React.FC = () => {
             </main>
             <Footer />
             {toast && <Toast key={toast.id} message={toast.message} type={toast.type} onClose={handleCloseToast} />}
+            <AuthModal 
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                onLoginSuccess={handleLoginSuccess}
+            />
         </div>
     );
 };
